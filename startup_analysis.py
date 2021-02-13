@@ -29,7 +29,7 @@ transformer = ColumnTransformer(transformers=[(
 features = transformer.fit_transform(features.tolist())
 features = features.astype(float)
 
-x_train, x_test, y_train, y_test = train_test_split(features, label, test_size=0.25, random_state=1)
+x_train, x_test, y_train, y_test = train_test_split(features, label, test_size=0.20, random_state=1)
 
 print("******Decision Tree Regressor********")
 for i in range(3, 8):
@@ -39,6 +39,7 @@ for i in range(3, 8):
     print("training score: ", dtr.score(x_train, y_train))
     print("testing score: ", dtr.score(x_test, y_test))
 
+print()
 print("*****Random Forest Regressor*********")
 for i in range(3, 11):
     rfr = RandomForestRegressor(n_estimators=i)
@@ -54,7 +55,7 @@ y_train_predict = lin_model.predict(x_train)
 rmse = (np.sqrt(mean_squared_error(y_train, y_train_predict)))
 r2 = r2_score(y_train, y_train_predict)
 
-
+print()
 print("******Linear Regression************")
 print("The model performance for training set")
 print("--------------------------------------")
@@ -70,3 +71,32 @@ print("The model performance for testing set")
 print("--------------------------------------")
 print('RMSE is {}'.format(rmse))
 print('R2 score is {}'.format(r2))
+
+print()
+print("Comparing the 3 models")
+print("--------------------------------------")
+
+dtr = DecisionTreeRegressor(max_depth=5)
+dtr.fit(x_train, y_train)
+dt_pred = dtr.predict(x_test)
+dt = pd.DataFrame({'Real Profit Values': y_test.reshape(-1), 'Predicted Profit Values': dt_pred.reshape(-1)})
+print("Decision Tree Regressor:")
+dt["Difference"] = dt["Real Profit Values"] - dt["Predicted Profit Values"]
+print(dt)
+print("Average Difference: ", sum(dt["Difference"]) / len(dt["Difference"]))
+
+rfr = RandomForestRegressor(n_estimators=5)
+rfr.fit(x_train, y_train.ravel())
+rfr_pred = rfr.predict(x_test)
+rf = pd.DataFrame({'Real Profit Values': y_test.reshape(-1), 'Predicted Profit Values': rfr_pred.reshape(-1)})
+print("Random Forest Regressor")
+rf["Difference"] = rf["Real Profit Values"] - rf["Predicted Profit Values"]
+print(rf)
+print("Average Difference: ", sum(rf["Difference"]) / len(rf["Difference"]))
+
+df = pd.DataFrame({'Real Profit Values': y_test.reshape(-1), 'Predicted Profit Values': y_test_predict.reshape(-1)})
+print("Linear Regression Model")
+df["Difference"] = df["Real Profit Values"] - df["Predicted Profit Values"]
+
+print(df)
+print("Average Difference: ", sum(df["Difference"]) / len(df["Difference"]))
